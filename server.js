@@ -65,7 +65,19 @@ app.post('/send-email', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
       subject: `New Contact Form Message from ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+      text: `
+📧 New Contact Form Message
+
+👤 Name: ${name}
+📧 Email: ${email}
+
+💬 Message:
+${message}
+
+---
+This message was sent from your portfolio website contact form.
+Time: ${new Date().toLocaleString()}
+      `
     };
 
     console.log('Sending email...');
