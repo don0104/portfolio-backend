@@ -6,7 +6,7 @@ const app = express();
 
 // Configure CORS
 app.use(cors({
-  origin: 'https://portfolio-zm3g.vercel.app',
+  origin: ['https://portfolio-zm3g.vercel.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true
@@ -18,6 +18,7 @@ app.use(express.json());
 // Log all requests
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
   next();
 });
 
@@ -46,6 +47,12 @@ app.post('/send-email', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Check if environment variables are set
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      return res.status(500).json({ error: 'Email service not configured' });
+    }
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -68,14 +75,20 @@ app.post('/send-email', async (req, res) => {
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error('Email error:', error);
-    res.status(500).json({ error: 'Failed to send email' });
+    res.status(500).json({ 
+      error: 'Failed to send email',
+      details: error.message 
+    });
   }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
-  res.status(500).send('Something broke!');
+  res.status(500).json({ 
+    error: 'Something went wrong',
+    details: err.message 
+  });
 });
 
 // Start server
