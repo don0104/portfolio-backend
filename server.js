@@ -1,4 +1,5 @@
 const express = require('express');
+const nodemailer = require('nodemailer');
 const cors = require('cors');
 
 const app = express();
@@ -28,6 +29,34 @@ app.get('/health', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   res.send('Hello World!');
+});
+
+// Email route
+app.post('/send-email', async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+    
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      subject: `New Contact Form Message from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Email error:', error);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
 });
 
 // Error handling middleware
