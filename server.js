@@ -4,8 +4,12 @@ const cors = require('cors');
 
 const app = express();
 
-// Enable CORS for all routes
-app.use(cors());
+// Configure CORS
+app.use(cors({
+  origin: ['https://portfolio-zm3g.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
 
 // Parse JSON bodies
 app.use(express.json());
@@ -34,8 +38,13 @@ app.get('/', (req, res) => {
 // Email route
 app.post('/send-email', async (req, res) => {
   try {
+    console.log('Received request:', req.body);
     const { name, email, message } = req.body;
     
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -51,7 +60,10 @@ app.post('/send-email', async (req, res) => {
       text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
     };
 
-    await transporter.sendMail(mailOptions);
+    console.log('Sending email...');
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.response);
+    
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error('Email error:', error);
