@@ -6,9 +6,9 @@ const app = express();
 
 // Configure CORS
 app.use(cors({
-  origin: '*',
+  origin: 'https://portfolio-zm3g.vercel.app',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true
 }));
 
